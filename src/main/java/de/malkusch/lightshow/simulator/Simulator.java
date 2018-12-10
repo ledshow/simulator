@@ -74,6 +74,7 @@ public final class Simulator extends Application {
 	@Override
 	public void stop() {
 		artnet.stop();
+		System.exit(0); // TODO Artnet4j is not stopping the server
 	}
 
 	public static void main(String[] args) throws SocketException, ArtNetException, UnknownHostException {
