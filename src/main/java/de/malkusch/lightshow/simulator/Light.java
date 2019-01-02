@@ -9,32 +9,34 @@ import javafx.scene.shape.Rectangle;
 
 public final class Light {
 
-	private final Rectangle box;
-	private final VBox node;
-	private final int startAddress;
+    private final Rectangle box;
+    private final VBox node;
+    private final int startAddress;
 
-	public Light(int startAddress, String label) {
-		this.startAddress = startAddress;
-		box = new Rectangle(50, 50);
-		box.setFill(Color.BLACK);
-		node = new VBox(box, new Label(label));
-		node.setAlignment(Pos.TOP_CENTER);
-	}
+    public Light(int startAddress, String label) {
+        this.startAddress = startAddress;
+        box = new Rectangle(50, 50);
+        box.setFill(Color.BLACK);
+        var labelUi = new Label(label);
+        labelUi.setTextFill(Color.WHITE);
+        node = new VBox(box, labelUi);
+        node.setAlignment(Pos.TOP_CENTER);
+    }
 
-	public Node node() {
-		return node;
-	}
+    public Node node() {
+        return node;
+    }
 
-	public void update(byte[] dmx) {
-		var r = toColor(dmx[startAddress + 0]);
-		var g = toColor(dmx[startAddress + 1]);
-		var b = toColor(dmx[startAddress + 2]);
-		var color = Color.color(r, g, b);
-		box.setFill(color);
-	}
+    public void update(byte[] dmx) {
+        var r = toColor(dmx[startAddress + 0]);
+        var g = toColor(dmx[startAddress + 1]);
+        var b = toColor(dmx[startAddress + 2]);
+        var color = Color.color(r, g, b);
+        box.setFill(color);
+    }
 
-	private static double toColor(byte value) {
-		return Byte.toUnsignedInt(value) / (double) 255;
-	}
+    private static double toColor(byte value) {
+        return Byte.toUnsignedInt(value) / (double) 255;
+    }
 
 }

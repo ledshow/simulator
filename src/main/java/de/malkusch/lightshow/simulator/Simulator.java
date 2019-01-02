@@ -19,66 +19,69 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public final class Simulator extends Application {
 
-	private final ArtNet artnet = new ArtNet();
-	private final List<Light> lights;
-	private final BorderPane pane = new BorderPane();
+    private final ArtNet artnet = new ArtNet();
+    private final List<Light> lights;
+    private final BorderPane pane = new BorderPane();
 
-	public Simulator() {
-		var leftCenter = new Light(0, "leftCenter");
-		var leftFront = new Light(3, "leftFront");
-		var frontLeft = new Light(6, "frontLeft");
-		var frontCenter = new Light(9, "frontCenter");
-		var frontRight = new Light(12, "frontRight");
-		var rightFront = new Light(15, "rightFront");
-		var rightCenter = new Light(18, "rightCenter");
+    public Simulator() {
+        var leftCenter = new Light(0, "leftCenter");
+        var leftFront = new Light(3, "leftFront");
+        var frontLeft = new Light(6, "frontLeft");
+        var frontCenter = new Light(9, "frontCenter");
+        var frontRight = new Light(12, "frontRight");
+        var rightFront = new Light(15, "rightFront");
+        var rightCenter = new Light(18, "rightCenter");
 
-		lights = Arrays.asList(leftCenter, leftFront, frontLeft, frontCenter, frontRight, rightFront, rightCenter);
+        pane.setStyle("-fx-background-color: #000000;");
 
-		var left = new VBox(50, leftFront.node(), leftCenter.node());
-		pane.setLeft(left);
+        lights = Arrays.asList(leftCenter, leftFront, frontLeft, frontCenter, frontRight, rightFront, rightCenter);
 
-		var top = new HBox(100, frontLeft.node(), frontCenter.node(), frontRight.node());
-		top.setAlignment(Pos.CENTER);
-		pane.setTop(top);
+        var left = new VBox(50, leftFront.node(), leftCenter.node());
+        pane.setLeft(left);
 
-		var right = new VBox(50, rightFront.node(), rightCenter.node());
-		pane.setRight(right);
-	}
+        var top = new HBox(100, frontLeft.node(), frontCenter.node(), frontRight.node());
+        top.setAlignment(Pos.CENTER);
+        pane.setTop(top);
 
-	@Override
-	public void start(Stage stage) throws SocketException, ArtNetException {
-		Scene scene = new Scene(pane, 640, 480);
-		stage.setScene(scene);
-		stage.show();
+        var right = new VBox(50, rightFront.node(), rightCenter.node());
+        pane.setRight(right);
+    }
 
-		artnet.start(InetAddress.getLoopbackAddress());
-		artnet.addServerListener(new ArtNetServerEventAdapter() {
-			@Override
-			public void artNetPacketReceived(ArtNetPacket packet) {
-				if (packet.getType() != PacketType.ART_OUTPUT) {
-					return;
-				}
+    @Override
+    public void start(Stage stage) throws SocketException, ArtNetException {
+        Scene scene = new Scene(pane, 640, 480, Color.BLACK);
+        stage.setScene(scene);
+        stage.show();
 
-				var dmx = (ArtDmxPacket) packet;
-				byte[] data = dmx.getDmxData();
+        artnet.start(InetAddress.getLoopbackAddress());
+        artnet.addServerListener(new ArtNetServerEventAdapter() {
+            @Override
+            public void artNetPacketReceived(ArtNetPacket packet) {
+                if (packet.getType() != PacketType.ART_OUTPUT) {
+                    return;
+                }
 
-				Platform.runLater(() -> lights.forEach(l -> l.update(data)));
-			}
-		});
-	}
+                var dmx = (ArtDmxPacket) packet;
+                byte[] data = dmx.getDmxData();
 
-	@Override
-	public void stop() {
-		artnet.stop();
-		System.exit(0); // TODO Artnet4j is not stopping the server
-	}
+                Platform.runLater(() -> lights.forEach(l -> l.update(data)));
+            }
+        });
+    }
 
-	public static void main(String[] args) throws SocketException, ArtNetException, UnknownHostException {
-		launch();
-	}
+    @Override
+    public void stop() {
+        artnet.stop();
+        System.exit(0); // TODO Artnet4j is not stopping the server
+    }
+
+    public static void main(String[] args) throws SocketException, ArtNetException, UnknownHostException {
+        launch();
+    }
 
 }
